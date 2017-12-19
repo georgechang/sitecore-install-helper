@@ -69,13 +69,72 @@ Import-PfxCertificate -FilePath "solr-ssl.keystore.p12" -CertStoreLocation "cert
 
 
 Register-PSRepository -Name SitecoreGallery
-# run 
+# run install-sitecoreinstallationmodules
 
 #for WMF
 $feature = Get-WindowsFeature Web-Server
 if (!$feature.Installed) {
 	Install-WindowsFeature Web-Server
+	Install-WindowsFeature Web-Mgmt-Console
+	#restart
 }
 
-Install-SitecoreConfiguration -Path xconnect-solr.json -SolrUrl https://localhost:8983/solr -SolrRoot C:\solr\solr-6.6.2 -SolrService solr662 -CorePrefix sask
+$feature = Get-WindowsFeature Web-Asp-Net45
+if (!$feature.Installed) {
+	Install-WindowsFeature Web-Asp-Net45
+}
 
+Install-SitecoreConfiguration -Path xconnect-solr.json -SolrUrl https://localhost:8983/solr -SolrRoot C:\solr\solr-6.6.2 -SolrService solr662 -CorePrefix saskqa
+
+#install webpi
+Invoke-WebRequest -Uri "https://download.microsoft.com/download/C/F/F/CFF3A0B8-99D4-41A2-AE1A-496C08BEB904/WebPlatformInstaller_amd64_en-US.msi" -OutFile WebPlatformInstaller_amd64_en-US.msi
+.\WebPlatformInstaller_amd64_en-US.msi /quiet
+
+& "C:\Program Files\Microsoft\Web Platform Installer\WebpiCmd-x64.exe" /install /products:WDeploy36 /AcceptEULA
+
+#install dacfx
+Invoke-WebRequest -Uri "https://download.microsoft.com/download/F/9/3/F938FCDD-3FAF-40DF-A530-778898E2E5EE/EN/x64/DacFramework.msi" -OutFile DacFramework-x64.msi
+.\DacFramework-x64.msi /quiet
+
+Invoke-WebRequest -Uri "https://download.microsoft.com/download/5/2/8/528EE32B-A63B-462A-BF86-48EDE3DDF5A6/EN/x86/DacFramework.msi" -OutFile DacFramework-x86.msi
+.\DacFramework-x86.msi /quiet
+
+# Invoke-WebRequest -Uri "https://download.microsoft.com/download/5/E/4/5E4FCC45-4D26-4CBE-8E2D-79DB86A85F09/EN/x64/DacFramework.msi" -OutFile DacFramework-x64.msi
+# .\DacFramework-x64.msi /quiet
+
+# Invoke-WebRequest -Uri "https://download.microsoft.com/download/5/E/4/5E4FCC45-4D26-4CBE-8E2D-79DB86A85F09/EN/x86/DacFramework.msi" -OutFile DacFramework-x86.msi
+# .\DacFramework-x86.msi /quiet
+
+#install CLR Types
+
+Invoke-WebRequest -Uri "https://download.microsoft.com/download/C/1/9/C1917410-8976-4AE0-98BF-1104349EA1E6/x64/SQLSysClrTypes.msi" -OutFile SQLSysClrTypes2017-x64.msi
+.\SQLSysClrTypes2017-x64.msi /quiet
+
+# Invoke-WebRequest -Uri "https://download.microsoft.com/download/8/7/2/872BCECA-C849-4B40-8EBE-21D48CDF1456/ENU/x64/SQLSysClrTypes.msi" -OutFile SQLSysClrTypes2016-x64.msi
+# .\SQLSysClrTypes2016-x64.msi /quiet
+
+# Invoke-WebRequest -Uri "https://download.microsoft.com/download/8/7/2/872BCECA-C849-4B40-8EBE-21D48CDF1456/ENU/x86/SQLSysClrTypes.msi" -OutFile SQLSysClrTypes2016-x86.msi
+# .\SQLSysClrTypes2016-x86.msi /quiet
+
+#install Script Dom
+# Invoke-WebRequest -Uri "https://download.microsoft.com/download/8/7/2/872BCECA-C849-4B40-8EBE-21D48CDF1456/ENU/x64/SqlDom.msi" -OutFile SqlDom2016-x64.msi
+# .\SqlDom2016-x64.msi /quiet
+
+# Invoke-WebRequest -Uri "https://download.microsoft.com/download/8/7/2/872BCECA-C849-4B40-8EBE-21D48CDF1456/ENU/x86/SqlDom.msi" -OutFile SqlDom2016-x86.msi
+# .\SqlDom2016-x86.msi /quiet
+
+#install SQLSMO
+# Invoke-WebRequest -Uri "https://download.microsoft.com/download/8/7/2/872BCECA-C849-4B40-8EBE-21D48CDF1456/ENU/x64/SharedManagementObjects.msi" -OutFile SharedManagementObjects-x64.msi
+# .\SharedManagementObjects-x64.msi /quiet
+
+
+#install .net 4.6.2
+Invoke-WebRequest -Uri "https://download.microsoft.com/download/F/9/4/F942F07D-F26F-4F30-B4E3-EBD54FABA377/NDP462-KB3151800-x86-x64-AllOS-ENU.exe" -OutFile NDP462-KB3151800-x86-x64-AllOS-ENU.exe
+.\NDP462-KB3151800-x86-x64-AllOS-ENU.exe /install /quiet
+
+
+
+Install-SitecoreConfiguration -Path ./xconnect-xp0.json -Package './Sitecore 9.0.0 rev. 171002 (OnPrem)_xp0xconnect.scwdp.zip' -LicenseFile ./license.xml -XConnectCert www-dc9-cm-q1 -SqlDbPrefix "sask" -SqlServer saskpower-qadev-sqlelastic.database.windows.net -SqlAdminUser serveradmin -SqlAdminPassword saskSC9azure -SolrCorePrefix "sask" -SolrUrl "https://localhost:8983/solr"
+
+New-WebBinding -Name sask -Protocol https -Port 443 -HostHeader sask
+#associate cert with web binding
