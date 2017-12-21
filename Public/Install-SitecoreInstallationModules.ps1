@@ -31,5 +31,3 @@ function Install-SitecoreInstallationModules {
 		Write-Host "Sitecore Install Framework module successfully updated."
 	}
 }
-
-Export-ModuleMember -Function Install-SitecoreInstallationModules

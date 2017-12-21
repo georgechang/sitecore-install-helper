@@ -109,5 +109,29 @@ function Install-SitecoreEnvironment {
 			XConnectCollectionService = "https://$XConnectHostName"
 		} 
 		Install-SitecoreConfiguration @sitecoreParams -Verbose
+
+		$sitecoreParams = 
+		@{     
+			Path                      = "$PSScriptRoot\sitecore-XP1-cd.json"
+			Package                   = "$PSScriptRoot\Sitecore 9.0.0 rev. 171002 (OnPrem)_cd.scwdp.zip"
+			LicenseFile               = "$PSScriptRoot\license.xml"
+			SqlDbPrefix               = "sask"
+			SolrCorePrefix            = "sask"
+			XConnectCert              = "www-dc9-cd-q1"
+			SiteName                  = "sask"
+			SqlCoreUser               = "coreuser"
+			SqlCorePassword           = "Test12345"
+			SqlWebUser                = "webuser"
+			SqlWebPassword            = "Test12345"
+			SqlFormsUser              = "formsuser"
+			SqlFormsPassword          = "Test12345"
+			SqlServer                 = "saskpower-qadev-sqlelastic.database.windows.net"
+			SolrUrl                   = "https://www-dc9-cm-q1:8983/solr"
+			XConnectCollectionService = "https://www-dc9-cm-q1:4433"
+			XConnectReferenceDataService = "https://www-dc9-cm-q1:4433"
+			MarketingAutomationOperationsService = "https://www-dc9-cm-q1:4433"
+			MarketingAutomationReportingService = "https://www-dc9-cm-q1:4433"
+		} 
+		Install-SitecoreConfiguration @sitecoreParams -Verbose
 	}
 }

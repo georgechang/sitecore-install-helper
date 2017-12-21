@@ -11,5 +11,3 @@ function Install-XConnectSelfSignedCertificate {
 	} 
 	Install-SitecoreConfiguration @certParams -Verbose:$VerbosePreference
 }
-
-Export-ModuleMember -Function Install-XConnectSelfSignedCertificate
