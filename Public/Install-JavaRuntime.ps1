@@ -1,5 +1,5 @@
 function Install-JavaRuntime {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess)]
 	param(
 		[string]$Path,
 		[string]$Url

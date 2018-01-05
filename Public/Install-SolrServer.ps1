@@ -1,15 +1,20 @@
 function Install-SolrServer {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess)]
 	param(
+		[Parameter(Mandatory, ValueFromPipeline)]
 		[string]$Path,
-		[string]$DestinationPath
+		[string]$Uri = "http://mirrors.gigenet.com/apache/lucene/solr/6.6.2/solr-6.6.2.zip"
 	)
-	Invoke-WebRequest -Uri "http://mirrors.gigenet.com/apache/lucene/solr/6.6.2/solr-6.6.2.zip" -OutFile  $FilePath -UseBasicParsing
-    Expand-Archive $FilePath -DestinationPath $InstallPath
-    
-    #get nssm
 
-    ./nssm.exe install $Name "$Path\bin\solr.cmd" start -f -p 8983
-	./nssm.exe set $Name DisplayName "Solr 6.6.2"
-	./nssm.exe set $Name Description "Service for Solr 6.6.2"
+	$activity = "Installing Solr Server..."
+	Write-Progress -Activity $activity -Status "Downloading Solr package..."
+	if ($PSCmdlet.ShouldProcess($Uri, "Downloading package")) {
+		$tmp = New-TemporaryFile
+		Invoke-WebRequest -Uri $Uri -OutFile $tmp.FullName
+	}
+	Write-Progress -Activity $activity -Status "Extracting Solr package to $Path..."
+	if ($PSCmdlet.ShouldProcess($tmp.FullName, "Extract package")) {
+		Expand-Archive $tmp.FullName -DestinationPath $Path
+	}
+	Write-Progress -Activity $activity -Completed
 }
