@@ -1,4 +1,4 @@
-function Install-ServerPrerequisities {
+function Install-ServerPrerequisites {
 	[CmdletBinding(SupportsShouldProcess)]
 	param(
 		[switch]$NoDatabases
@@ -46,6 +46,7 @@ function Install-ServerPrerequisities {
 		Invoke-WebRequest -Uri $webpi -OutFile WebPlatformInstaller_amd64_en-US.msi
 		Write-Verbose "Installing Web Platform Installer..."
 		.\WebPlatformInstaller_amd64_en-US.msi /quiet
+		Start-Sleep -Seconds 5
 		Write-Verbose "Web Platform Installer installed successfully."
 	}
 	else {
@@ -54,6 +55,7 @@ function Install-ServerPrerequisities {
 
 	#install web deploy
 	Write-Verbose "Checking server for Web Deploy 3.6..."
+	#catch exception from Get-ChildItem
 	if ((-not (Test-Path "hklm:software\microsoft\iis extensions\msdeploy")) -and ($null -eq (Get-ChildItem "hklm:software\microsoft\iis extensions\msdeploy"))) {
 		Write-Verbose "Web Deploy 3.6 was not detected. Installing with Web PI..."
 		& "$env:programfiles\Microsoft\Web Platform Installer\WebpiCmd-x64.exe" /install /products:WDeploy36 /AcceptEULA
@@ -61,6 +63,18 @@ function Install-ServerPrerequisities {
 	}
 	else {
 		Write-Verbose "Web Deploy 3.6 has been detected. Skipping..."
+	}
+
+	#install URL rewrite
+	Write-Verbose "Checking server for URL Rewrite..."
+	#catch exception from Get-ChildItem
+	if ((-not (Test-Path "hklm:software\microsoft\iis extensions\url rewrite")) -and ($null -eq (Get-ChildItem "hklm:software\microsoft\iis extensions\url rewrite"))) {
+		Write-Verbose "URL Rewrite was not detected. Installing with Web PI..."
+		& "$env:programfiles\Microsoft\Web Platform Installer\WebpiCmd-x64.exe" /install /products:UrlRewrite2 /AcceptEULA
+		Write-Verbose "URL Rewrite has been successfully installed."
+	}
+	else {
+		Write-Verbose "URL Rewrite has been detected. Skipping..."
 	}
 
 	if (-not $NoDatabases) {
@@ -147,5 +161,8 @@ function Install-ServerPrerequisities {
 		Write-Verbose "Installing ASP.NET 4.6.2..."
 		.\NDP462-KB3151800-x86-x64-AllOS-ENU.exe /install /quiet
 		Write-Verbose "ASP.NET 4.6.2 has been successfully installed."
+	}
+	else {
+		Write-Verbose "ASP.NET 4.6.2 has been detected. Skipping..."
 	}
 }

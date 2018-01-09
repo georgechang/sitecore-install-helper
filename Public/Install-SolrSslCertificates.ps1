@@ -7,6 +7,9 @@ function Install-SolrSslCertificates {
 		[string]$KeyPass,
 		[Parameter(Mandatory)]
 		[string]$StorePass,
+		[string]$HostName = "localhost",
+		[string]$IpAddress = "127.0.0.1",
+		[string]$DistinguishedName = "CN=localhost, OU=Organizational Unit, O=Organization, L=Location, ST=State, C=Country",
 		[string]$JksFileName = "solr-ssl.keystore.jks",
 		[string]$P12FileName = "solr-ssl.keystore.p12"
 	)
@@ -16,7 +19,7 @@ function Install-SolrSslCertificates {
 	Write-Progress -Activity $activity -Status "Generating SSL keys..."
 	$env:Path += ";$env:programfiles\Java\jre-9.0.1\bin"
 	if ($PSCmdlet.ShouldProcess($Path, "Creating keys")) {
-		& keytool.exe -genkeypair -alias solr-ssl -keyalg RSA -keysize 2048 -keypass $KeyPass -storepass $StorePass -validity 365 -keystore $JksFileName -ext SAN=DNS:localhost,IP:127.0.0.1 -dname "CN=localhost, OU=Organizational Unit, O=Organization, L=Location, ST=State, C=Country"
+		& keytool.exe -genkeypair -alias solr-ssl -keyalg RSA -keysize 2048 -keypass $KeyPass -storepass $StorePass -validity 365 -keystore $JksFileName -ext SAN=DNS:$HostName,IP:$IpAddress -dname "$DistinguishedName"
 		& keytool.exe -importkeystore -srcalias solr-ssl -destalias solr-ssl -srckeystore $JksFileName -destkeystore $P12FileName -srcstoretype jks -deststoretype pkcs12 -srcstorepass $StorePass -deststorepass $StorePass -srckeypass $KeyPass -destkeypass $KeyPass -noprompt
 		Copy-Item solr-ssl.keystore.jks $Path\server\etc
 	}

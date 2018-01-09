@@ -10,6 +10,7 @@ function Install-SitecoreInstallationModules {
 	{
 		Write-Verbose "Sitecore PS repository not specified or not installed. Installing repository as '$RepositoryName'."
 
+		# catch exception thrown by Get-PackageProvider
 		if (-not (Get-PackageProvider -ListAvailable -Name "NuGet")) {
 			Install-PackageProvider -Name NuGet -RequiredVersion 2.8.5.201 -Force
 		}
