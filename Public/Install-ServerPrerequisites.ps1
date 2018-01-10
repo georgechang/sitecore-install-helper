@@ -45,8 +45,7 @@ function Install-ServerPrerequisites {
 		Write-Verbose "Downloading Web Platform Installer from $webpi..."
 		Invoke-WebRequest -Uri $webpi -OutFile WebPlatformInstaller_amd64_en-US.msi
 		Write-Verbose "Installing Web Platform Installer..."
-		.\WebPlatformInstaller_amd64_en-US.msi /quiet
-		Start-Sleep -Seconds 5
+		Start-Process msiexec.exe -Wait -ArgumentList "/i WebPlatformInstaller_amd64_en-US.msi /quiet /qn /norestart"
 		Write-Verbose "Web Platform Installer installed successfully."
 	}
 	else {
@@ -96,14 +95,14 @@ function Install-ServerPrerequisites {
 			Invoke-WebRequest -Uri $dac64 -OutFile DacFramework2016-x64.msi
 			Write-Verbose "Download of DACFx x64 successful."
 			Write-Verbose "Installing DACFx x64..."
-			.\DacFramework2016-x64.msi /quiet
+			Start-Process msiexec.exe -Wait -ArgumentList "/i DacFramework2016-x64.msi /quiet /qn /norestart"
 			Write-Verbose "Installation of DACFx x64 successful."
 
 			Write-Verbose "Downloading DACFx x86 from $dac86..."
 			Invoke-WebRequest -Uri $dac86 -OutFile DacFramework2016-x86.msi
 			Write-Verbose "Download of DACFx x86 successful."
 			Write-Verbose "Installing DACFx x86..."
-			.\DacFramework2016-x86.msi /quiet
+			Start-Process msiexec.exe -Wait -ArgumentList "/i DacFramework2016-x86.msi /quiet /qn /norestart"
 			Write-Verbose "Installation of DACFx x86 successful."
 
 			Write-Verbose "SQL Server 2016 Data-Tier Application Framework has been successfully installed."
@@ -126,6 +125,7 @@ function Install-ServerPrerequisites {
 			Invoke-WebRequest -Uri $clr2016 -OutFile SQLSysClrTypes2016-x64.msi
 			Write-Verbose "Download of CLR Types 2016 successful."
 			Write-Verbose "Installing CLR Types 2016..."
+			Start-Process msiexec.exe -Wait -ArgumentList "/i SQLSysClrTypes2016-x64.msi /quiet /qn /norestart"
 			.\SQLSysClrTypes2016-x64.msi /quiet
 			Write-Verbose "CLR Types for SQL Server 2016 has been successfully installed."
 		}
@@ -142,7 +142,7 @@ function Install-ServerPrerequisites {
 			Invoke-WebRequest -Uri $smo -OutFile SharedManagementObjects-x64.msi
 			Write-Verbose "Download of SMO 2016 successful."
 			Write-Verbose "Installing SMO 2016..."
-			.\SharedManagementObjects-x64.msi /quiet
+			Start-Process msiexec.exe -Wait -ArgumentList "/i SharedManagementObjects-x64.msi /quiet /qn /norestart"
 			Write-Verbose "SQL Server 2016 Management Objects has been successfully installed."
 		}
 		else {
@@ -159,7 +159,7 @@ function Install-ServerPrerequisites {
 		Invoke-WebRequest -Uri  -OutFile NDP462-KB3151800-x86-x64-AllOS-ENU.exe
 		Write-Verbose "Download of ASP.NET 4.6.2 successful."
 		Write-Verbose "Installing ASP.NET 4.6.2..."
-		.\NDP462-KB3151800-x86-x64-AllOS-ENU.exe /install /quiet
+		& .\NDP462-KB3151800-x86-x64-AllOS-ENU.exe /install /quiet
 		Write-Verbose "ASP.NET 4.6.2 has been successfully installed."
 	}
 	else {
