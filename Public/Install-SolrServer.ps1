@@ -9,7 +9,7 @@ function Install-SolrServer {
 	$activity = "Installing Solr Server..."
 	Write-Progress -Activity $activity -Status "Downloading Solr package..."
 	if ($PSCmdlet.ShouldProcess($Uri, "Downloading package")) {
-		$tmp = New-TemporaryFile
+		$tmp = [IO.Path]::GetTempFileName() | Rename-Item -NewName { $_ -replace 'tmp$', 'zip' } -PassThru
 		Invoke-WebRequest -Uri $Uri -OutFile $tmp.FullName
 	}
 	Write-Progress -Activity $activity -Status "Extracting Solr package to $Path..."

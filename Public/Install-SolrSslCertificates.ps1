@@ -10,6 +10,8 @@ function Install-SolrSslCertificates {
 		[string]$HostName = "localhost",
 		[string]$IpAddress = "127.0.0.1",
 		[string]$DistinguishedName = "CN=localhost, OU=Organizational Unit, O=Organization, L=Location, ST=State, C=Country",
+		[Parameter(Mandatory)]
+		[string]$ServiceName,
 		[string]$JksFileName = "solr-ssl.keystore.jks",
 		[string]$P12FileName = "solr-ssl.keystore.p12"
 	)
@@ -27,6 +29,7 @@ function Install-SolrSslCertificates {
 	Write-Progress -Activity $activity -Status "Updating Solr configuration for SSL..."
 	if ($PSCmdlet.ShouldProcess($Path, "Updating Solr config")) {
 		$solrincmdContent = Get-Content $Path\bin\solr.in.cmd
+		$newContent = ""
 		foreach($content in $solrincmdContent)
 		{
 			if ($content -match "^REM set SOLR_SSL_(?!CLIENT)")
@@ -35,16 +38,19 @@ function Install-SolrSslCertificates {
 				$content = $content.replace("REM ", "")
 				if ($content -match " SOLR_SSL_(KEY|TRUST)_STORE=")
 				{
-					$content = $content.Substring(0, $content.IndexOf('=')) + "=$solrServerKeystorePath"
+					$content = $content.Substring(0, $content.IndexOf('=')) + "=$Path\server\etc\solr-ssl.keystore.jks"
 				}
 				elseif ($content -match " SOLR_SSL_(KEY|TRUST)_STORE_PASSWORD=")
 				{
-					$content = $content.Substring(0, $content.IndexOf('=')) + "=$SrcKeystoreSecret"
+					$content = $content.Substring(0, $content.IndexOf('=')) + "=$StorePass"
 				}
 				Write-Verbose "New content: $content"
 			}
-			Set-Content $solrincmdContent $content
+
+			$newContent += $content
+			$newContent += "`r`n"
 		}
+		Set-Content -Path $Path\bin\solr.in.cmd -Value $newContent
 	}
 
 	Write-Progress -Activity $activity -Status "Import SSL certificate to certificate store"
@@ -52,4 +58,7 @@ function Install-SolrSslCertificates {
 		$secureKeystoreSecret = ConvertTo-SecureString $KeyPass -AsPlainText -Force
 		Import-PfxCertificate -FilePath $P12FileName -CertStoreLocation "cert:\localmachine\root" -Password $secureKeystoreSecret
 	}
+
+	Set-Service $ServiceName -Status Stopped
+	Set-Service $ServiceName -Status Running
 }
