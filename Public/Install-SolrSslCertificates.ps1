@@ -13,7 +13,8 @@ function Install-SolrSslCertificates {
 		[Parameter(Mandatory)]
 		[string]$ServiceName,
 		[string]$JksFileName = "solr-ssl.keystore.jks",
-		[string]$P12FileName = "solr-ssl.keystore.p12"
+		[string]$P12FileName = "solr-ssl.keystore.p12",
+		[int]$CertificateValidityInDays = 365
 	)
 	$activity = "Setting up SSL for Solr..."
 
@@ -21,7 +22,7 @@ function Install-SolrSslCertificates {
 	Write-Progress -Activity $activity -Status "Generating SSL keys..."
 	$env:Path += ";$env:programfiles\Java\jre-9.0.1\bin"
 	if ($PSCmdlet.ShouldProcess($Path, "Creating keys")) {
-		& keytool.exe -genkeypair -alias solr-ssl -keyalg RSA -keysize 2048 -keypass $KeyPass -storepass $StorePass -validity 365 -keystore $JksFileName -ext SAN=DNS:$HostName,IP:$IpAddress -dname "$DistinguishedName"
+		& keytool.exe -genkeypair -alias solr-ssl -keyalg RSA -keysize 2048 -keypass $KeyPass -storepass $StorePass -validity $CertificateValidityInDays -keystore $JksFileName -ext SAN=DNS:$HostName,IP:$IpAddress -dname "$DistinguishedName"
 		& keytool.exe -importkeystore -srcalias solr-ssl -destalias solr-ssl -srckeystore $JksFileName -destkeystore $P12FileName -srcstoretype jks -deststoretype pkcs12 -srcstorepass $StorePass -deststorepass $StorePass -srckeypass $KeyPass -destkeypass $KeyPass -noprompt
 		Copy-Item solr-ssl.keystore.jks $Path\server\etc
 	}
@@ -53,12 +54,17 @@ function Install-SolrSslCertificates {
 		Set-Content -Path $Path\bin\solr.in.cmd -Value $newContent
 	}
 
-	Write-Progress -Activity $activity -Status "Import SSL certificate to certificate store"
+	Write-Progress -Activity $activity -Status "Importing SSL certificate to certificate store..."
 	if ($PSCmdlet.ShouldProcess($Path, "Import certificate")) {
 		$secureKeystoreSecret = ConvertTo-SecureString $KeyPass -AsPlainText -Force
 		Import-PfxCertificate -FilePath $P12FileName -CertStoreLocation "cert:\localmachine\root" -Password $secureKeystoreSecret
 	}
 
-	Set-Service $ServiceName -Status Stopped
-	Set-Service $ServiceName -Status Running
+	Write-Progress -Activity $activity -Status "Restarting Solr Service..."
+	if ($PSCmdlet.ShouldProcess($Path, "Restart service")) {
+		Set-Service $ServiceName -Status Stopped
+		Set-Service $ServiceName -Status Running
+	}
+
+	Write-Progress -Activity $activity -Completed
 }

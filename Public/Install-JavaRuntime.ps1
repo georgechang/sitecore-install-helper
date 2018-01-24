@@ -1,7 +1,8 @@
 function Install-JavaRuntime {
     [CmdletBinding(SupportsShouldProcess)]
 	param(
-		[string]$Url = "http://download.oracle.com/otn-pub/java/jdk/9.0.1+11/jre-9.0.1_windows-x64_bin.exe"
+		[string]$Url = "http://download.oracle.com/otn-pub/java/jdk/9.0.1+11/jre-9.0.1_windows-x64_bin.exe",
+		[string]$Version = "9.0.1"
 	)
 
 	$tmp = New-TemporaryFile | Rename-Item -NewName {[System.IO.Path]::ChangeExtension($_.Name, ".exe")}
@@ -15,9 +16,9 @@ function Install-JavaRuntime {
 	Invoke-WebRequest -Uri $Url -WebSession $session -OutFile $tmp.FullName
 
 	#install JRE
-	& $tmp.FullName /s
+	Start-Process $tmp.FullName -ArgumentList "/s" -Wait
 
 	#set environment vars
-	[Environment]::SetEnvironmentVariable("PATH", "$env:programfiles\Java\jre-9.0.1\bin", [System.EnvironmentVariableTarget]::Machine)
-	[Environment]::SetEnvironmentVariable("JAVA_HOME", "$env:programfiles\Java\jre-9.0.1", [System.EnvironmentVariableTarget]::Machine)
+	[Environment]::SetEnvironmentVariable("PATH", "$env:programfiles\Java\jre-$Version\bin", [System.EnvironmentVariableTarget]::Machine)
+	[Environment]::SetEnvironmentVariable("JAVA_HOME", "$env:programfiles\Java\jre-$Version", [System.EnvironmentVariableTarget]::Machine)
 }

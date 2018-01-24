@@ -57,7 +57,7 @@ function Install-ServerPrerequisites {
 	#catch exception from Get-ChildItem
 	if ((-not (Test-Path "hklm:software\microsoft\iis extensions\msdeploy")) -and ($null -eq (Get-ChildItem "hklm:software\microsoft\iis extensions\msdeploy"))) {
 		Write-Verbose "Web Deploy 3.6 was not detected. Installing with Web PI..."
-		& "$env:programfiles\Microsoft\Web Platform Installer\WebpiCmd-x64.exe" /install /products:WDeploy36 /AcceptEULA
+		Start-Process "$env:programfiles\Microsoft\Web Platform Installer\WebpiCmd-x64.exe" -ArgumentList "/install /products:WDeploy36 /AcceptEULA" -Wait
 		Write-Verbose "Web Deploy 3.6 has been successfully installed."
 	}
 	else {
@@ -69,7 +69,7 @@ function Install-ServerPrerequisites {
 	#catch exception from Get-ChildItem
 	if ((-not (Test-Path "hklm:software\microsoft\iis extensions\url rewrite")) -and ($null -eq (Get-ChildItem "hklm:software\microsoft\iis extensions\url rewrite"))) {
 		Write-Verbose "URL Rewrite was not detected. Installing with Web PI..."
-		& "$env:programfiles\Microsoft\Web Platform Installer\WebpiCmd-x64.exe" /install /products:UrlRewrite2 /AcceptEULA
+		Start-Process "$env:programfiles\Microsoft\Web Platform Installer\WebpiCmd-x64.exe" -ArgumentList "/install /products:UrlRewrite2 /AcceptEULA" -Wait
 		Write-Verbose "URL Rewrite has been successfully installed."
 	}
 	else {
@@ -125,8 +125,7 @@ function Install-ServerPrerequisites {
 			Invoke-WebRequest -Uri $clr2016 -OutFile SQLSysClrTypes2016-x64.msi
 			Write-Verbose "Download of CLR Types 2016 successful."
 			Write-Verbose "Installing CLR Types 2016..."
-			Start-Process msiexec.exe -Wait -ArgumentList "/i SQLSysClrTypes2016-x64.msi /quiet /qn /norestart"
-			.\SQLSysClrTypes2016-x64.msi /quiet
+			Start-Process msiexec.exe -ArgumentList "/i SQLSysClrTypes2016-x64.msi /quiet /qn /norestart" -Wait
 			Write-Verbose "CLR Types for SQL Server 2016 has been successfully installed."
 		}
 		else {
@@ -159,7 +158,7 @@ function Install-ServerPrerequisites {
 		Invoke-WebRequest -Uri  -OutFile NDP462-KB3151800-x86-x64-AllOS-ENU.exe
 		Write-Verbose "Download of ASP.NET 4.6.2 successful."
 		Write-Verbose "Installing ASP.NET 4.6.2..."
-		& .\NDP462-KB3151800-x86-x64-AllOS-ENU.exe /install /quiet
+		Start-Process NDP462-KB3151800-x86-x64-AllOS-ENU.exe -ArgumentList "/install /quiet" -Wait
 		Write-Verbose "ASP.NET 4.6.2 has been successfully installed."
 	}
 	else {
