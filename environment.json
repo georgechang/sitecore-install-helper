@@ -1,0 +1,38 @@
+{
+	"servers": [
+		{
+			"name": "local",
+			"hostName": "localhost",
+			"checkPrerequisites": true,
+			"installSolr": true
+		}
+	],
+	"sql": {
+		"username": "sitecore",
+		"password": "pass@word1",
+		"prefix": "sc901"
+	},
+	"solr": {
+		"url": "https://localhost:8983/solr",
+		"root": "c:\\solr-6.6.2",
+		"service": "solr662",
+		"prefix": "sc901"
+	},
+	"assets": {
+		"xConnect": {
+			"solrJson": "",
+			"installJson": "",
+			"installPackage": ""
+		},
+		"sitecore": {
+			"solrJson": "",
+			"installJson": "",
+			"installPackage": "",
+			"license": ""
+		}
+	},
+	"installation": {
+		"hostName": "sc901.local",
+		"siteName": "sc901"
+	}
+}

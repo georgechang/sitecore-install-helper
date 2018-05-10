@@ -6,8 +6,7 @@ function Install-SitecoreInstallationModules {
 
 	$repository = Get-PSRepository -Name $RepositoryName -ErrorAction Ignore
 
-	if ($repository -eq $null)
-	{
+	if ($repository -eq $null) {
 		Write-Verbose "Sitecore PS repository not specified or not installed. Installing repository as '$RepositoryName'."
 
 		# catch exception thrown by Get-PackageProvider
@@ -21,8 +20,7 @@ function Install-SitecoreInstallationModules {
 		Write-Verbose "Repository '$RepositoryName' registered."
 	}
 
-	if (-not (Get-Module -ListAvailable -Name "SitecoreInstallFramework"))
-	{
+	if (-not (Get-Module -ListAvailable -Name "SitecoreInstallFramework")) {
 		Write-Verbose "Sitecore Install Framework module not installed. Installing module..."
 		Install-Module SitecoreInstallFramework
 		Write-Verbose "Sitecore Install Framework module successfully installed."

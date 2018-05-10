@@ -1,5 +1,5 @@
 function Install-JavaRuntime {
-    [CmdletBinding(SupportsShouldProcess)]
+	[CmdletBinding(SupportsShouldProcess)]
 	param(
 		[string]$Url = "http://download.oracle.com/otn-pub/java/jdk/9.0.1+11/jre-9.0.1_windows-x64_bin.exe",
 		[string]$Version = "9.0.1"

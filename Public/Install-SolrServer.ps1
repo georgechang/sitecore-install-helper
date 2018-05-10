@@ -1,5 +1,5 @@
 function Install-SolrServer {
-    [CmdletBinding(SupportsShouldProcess)]
+	[CmdletBinding(SupportsShouldProcess)]
 	param(
 		[Parameter(Mandatory, ValueFromPipeline)]
 		[string]$Path,

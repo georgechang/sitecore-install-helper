@@ -6,7 +6,7 @@ function Install-XConnectSelfSignedCertificate {
 	
 	$certParams = 
 	@{     
-		Path = "$PSScriptRoot\..\Private\json\xconnect-createcert.json"
+		Path            = "$PSScriptRoot\..\Private\json\xconnect-createcert.json"
 		CertificateName = $CertificateName 
 	} 
 	Install-SitecoreConfiguration @certParams -Verbose:$VerbosePreference

@@ -19,10 +19,11 @@ function Install-SolrSslCertificates {
 	$activity = "Setting up SSL for Solr..."
 
 	Write-Verbose "Adding JRE bin folder to path temporarily..."
-	Write-Progress -Activity $activity -Status "Generating SSL keys..."
 	$env:Path += ";$env:programfiles\Java\jre-9.0.1\bin"
+
+	Write-Progress -Activity $activity -Status "Generating SSL keys..."
 	if ($PSCmdlet.ShouldProcess($Path, "Creating keys")) {
-		& keytool.exe -genkeypair -alias solr-ssl -keyalg RSA -keysize 2048 -keypass $KeyPass -storepass $StorePass -validity $CertificateValidityInDays -keystore $JksFileName -ext SAN=DNS:$HostName,IP:$IpAddress -dname "$DistinguishedName"
+		& keytool.exe -genkeypair -alias solr-ssl -keyalg RSA -keysize 2048 -keypass $KeyPass -storepass $StorePass -validity $CertificateValidityInDays -keystore $JksFileName -ext SAN=DNS:$HostName, IP:$IpAddress -dname "$DistinguishedName"
 		& keytool.exe -importkeystore -srcalias solr-ssl -destalias solr-ssl -srckeystore $JksFileName -destkeystore $P12FileName -srcstoretype jks -deststoretype pkcs12 -srcstorepass $StorePass -deststorepass $StorePass -srckeypass $KeyPass -destkeypass $KeyPass -noprompt
 		Copy-Item solr-ssl.keystore.jks $Path\server\etc
 	}
@@ -31,18 +32,14 @@ function Install-SolrSslCertificates {
 	if ($PSCmdlet.ShouldProcess($Path, "Updating Solr config")) {
 		$solrincmdContent = Get-Content $Path\bin\solr.in.cmd
 		$newContent = ""
-		foreach($content in $solrincmdContent)
-		{
-			if ($content -match "^REM set SOLR_SSL_(?!CLIENT)")
-			{
+		foreach ($content in $solrincmdContent) {
+			if ($content -match "^REM set SOLR_SSL_(?!CLIENT)") {
 				Write-Verbose "Old content: $content"
 				$content = $content.replace("REM ", "")
-				if ($content -match " SOLR_SSL_(KEY|TRUST)_STORE=")
-				{
+				if ($content -match " SOLR_SSL_(KEY|TRUST)_STORE=") {
 					$content = $content.Substring(0, $content.IndexOf('=')) + "=$Path\server\etc\solr-ssl.keystore.jks"
 				}
-				elseif ($content -match " SOLR_SSL_(KEY|TRUST)_STORE_PASSWORD=")
-				{
+				elseif ($content -match " SOLR_SSL_(KEY|TRUST)_STORE_PASSWORD=") {
 					$content = $content.Substring(0, $content.IndexOf('=')) + "=$StorePass"
 				}
 				Write-Verbose "New content: $content"

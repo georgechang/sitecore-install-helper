@@ -3,6 +3,15 @@ function Install-ServerPrerequisites {
 	param(
 		[switch]$NoDatabases
 	)
+
+	#download URLs
+	$webpi = "https://download.microsoft.com/download/C/F/F/CFF3A0B8-99D4-41A2-AE1A-496C08BEB904/WebPlatformInstaller_amd64_en-US.msi"
+	$dac64 = "https://download.microsoft.com/download/5/E/4/5E4FCC45-4D26-4CBE-8E2D-79DB86A85F09/EN/x64/DacFramework.msi"
+	$dac86 = "https://download.microsoft.com/download/5/E/4/5E4FCC45-4D26-4CBE-8E2D-79DB86A85F09/EN/x86/DacFramework.msi"
+	$clr2016 = "https://download.microsoft.com/download/8/7/2/872BCECA-C849-4B40-8EBE-21D48CDF1456/ENU/x64/SQLSysClrTypes.msi"
+	$smo = "https://download.microsoft.com/download/8/7/2/872BCECA-C849-4B40-8EBE-21D48CDF1456/ENU/x64/SharedManagementObjects.msi"
+	$aspnet462 = "https://download.microsoft.com/download/F/9/4/F942F07D-F26F-4F30-B4E3-EBD54FABA377/NDP462-KB3151800-x86-x64-AllOS-ENU.exe"
+
 	#for WMF
 	Write-Verbose "Checking server for Windows Features - IIS..."
 	$feature = Get-WindowsFeature Web-Server
@@ -40,7 +49,6 @@ function Install-ServerPrerequisites {
 	#install webpi
 	Write-Verbose "Checking server for Web Platform Installer..."
 	if (-not (Test-Path "C:\Program Files\Microsoft\Web Platform Installer\WebpiCmd-x64.exe")) {
-		$webpi = "https://download.microsoft.com/download/C/F/F/CFF3A0B8-99D4-41A2-AE1A-496C08BEB904/WebPlatformInstaller_amd64_en-US.msi"
 		Write-Verbose "Web Platform Installer was not detected. Installing..."
 		Write-Verbose "Downloading Web Platform Installer from $webpi..."
 		Invoke-WebRequest -Uri $webpi -OutFile WebPlatformInstaller_amd64_en-US.msi
@@ -89,8 +97,6 @@ function Install-ServerPrerequisites {
 			#.\DacFramework2017-x86.msi /quiet
 
 			#2016
-			$dac64 = "https://download.microsoft.com/download/5/E/4/5E4FCC45-4D26-4CBE-8E2D-79DB86A85F09/EN/x64/DacFramework.msi"
-			$dac86 = "https://download.microsoft.com/download/5/E/4/5E4FCC45-4D26-4CBE-8E2D-79DB86A85F09/EN/x86/DacFramework.msi"
 			Write-Verbose "Downloading DACFx x64 from $dac64..."
 			Invoke-WebRequest -Uri $dac64 -OutFile DacFramework2016-x64.msi
 			Write-Verbose "Download of DACFx x64 successful."
@@ -120,7 +126,6 @@ function Install-ServerPrerequisites {
 			#.\SQLSysClrTypes2017-x64.msi /quiet
 
 			#2016
-			$clr2016 = "https://download.microsoft.com/download/8/7/2/872BCECA-C849-4B40-8EBE-21D48CDF1456/ENU/x64/SQLSysClrTypes.msi"
 			Write-Verbose "Downloading CLR Types 2016 from $clr2016..."
 			Invoke-WebRequest -Uri $clr2016 -OutFile SQLSysClrTypes2016-x64.msi
 			Write-Verbose "Download of CLR Types 2016 successful."
@@ -134,9 +139,8 @@ function Install-ServerPrerequisites {
 
 		#install SQLSMO
 		Write-Verbose "Checking server for SQL Server 2016 Management Objects..."
-		if (-not (Test-Path "${env:programfiles(x86)}\Microsoft SQL Server\130\DAC\bin\Microsoft.SqlServer.Types.dll")) {
+		if (-not (Test-Path "${env:programfiles(x86)}\Microsoft SQL Server\130\SDK\Assemblies\Microsoft.SqlServer.Smo.dll")) {
 			Write-Verbose "SQL Server 2016 Management Objects was not detected. Installing..."
-			$smo = "https://download.microsoft.com/download/8/7/2/872BCECA-C849-4B40-8EBE-21D48CDF1456/ENU/x64/SharedManagementObjects.msi"
 			Write-Verbose "Downloading SMO 2016 from $smo..."
 			Invoke-WebRequest -Uri $smo -OutFile SharedManagementObjects-x64.msi
 			Write-Verbose "Download of SMO 2016 successful."
@@ -153,7 +157,6 @@ function Install-ServerPrerequisites {
 	Write-Verbose "Checking server for ASP.NET 4.6.2..."
 	if (Get-ChildItem "HKLM:SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full\" | Get-ItemPropertyValue -Name Release | ForEach-Object { $_ -lt 394802 }) {
 		Write-Verbose "ASP.NET 4.6.2 was not detected. Installing..."
-		$aspnet462 = "https://download.microsoft.com/download/F/9/4/F942F07D-F26F-4F30-B4E3-EBD54FABA377/NDP462-KB3151800-x86-x64-AllOS-ENU.exe"
 		Write-Verbose "Downloading ASP.NET 4.6.2 from $aspnet462..."
 		Invoke-WebRequest -Uri  -OutFile NDP462-KB3151800-x86-x64-AllOS-ENU.exe
 		Write-Verbose "Download of ASP.NET 4.6.2 successful."
