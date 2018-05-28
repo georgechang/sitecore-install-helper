@@ -1,5 +1,5 @@
 function Install-SitecoreEnvironment {
-	[CmdletBinding()]
+	[CmdletBinding(SupportsShouldProcess)]
 	param(
 		[Parameter(Mandatory = $true)]
 		[string]$Path

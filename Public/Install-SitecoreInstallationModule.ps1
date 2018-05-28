@@ -1,4 +1,4 @@
-function Install-SitecoreInstallationModules {
+function Install-SitecoreInstallationModule {
 	[CmdletBinding(SupportsShouldProcess)]
 	param(
 		[string]$RepositoryName = "SitecoreGallery"
@@ -6,7 +6,7 @@ function Install-SitecoreInstallationModules {
 
 	$repository = Get-PSRepository -Name $RepositoryName -ErrorAction Ignore
 
-	if ($repository -eq $null) {
+	if ($null -eq $repository) {
 		Write-Verbose "Sitecore PS repository not specified or not installed. Installing repository as '$RepositoryName'."
 
 		# catch exception thrown by Get-PackageProvider

@@ -1,12 +1,12 @@
-function Install-SolrSslCertificates {
+function Install-SolrSslCertificate {
 	[CmdletBinding(SupportsShouldProcess)]
 	param(
 		[Parameter(Mandatory, ValueFromPipeline)]
 		[string]$Path,
 		[Parameter(Mandatory)]
-		[string]$KeyPass,
+		[SecureString]$KeyPass,
 		[Parameter(Mandatory)]
-		[string]$StorePass,
+		[SecureString]$StorePass,
 		[string]$HostName = "localhost",
 		[string]$IpAddress = "127.0.0.1",
 		[string]$DistinguishedName = "CN=localhost, OU=Organizational Unit, O=Organization, L=Location, ST=State, C=Country",
@@ -16,6 +16,12 @@ function Install-SolrSslCertificates {
 		[string]$P12FileName = "solr-ssl.keystore.p12",
 		[int]$CertificateValidityInDays = 365
 	)
+	$keypassBstr = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($KeyPass)
+	$keypassValue = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($keypassBstr)
+
+	$storepassBstr = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($StorePass)
+	$storepassValue = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($storepassBstr)
+
 	$activity = "Setting up SSL for Solr..."
 
 	Write-Verbose "Adding JRE bin folder to path temporarily..."
@@ -23,8 +29,8 @@ function Install-SolrSslCertificates {
 
 	Write-Progress -Activity $activity -Status "Generating SSL keys..."
 	if ($PSCmdlet.ShouldProcess($Path, "Creating keys")) {
-		Start-Process "keytool.exe" -ArgumentList "-genkeypair -alias solr-ssl -keyalg RSA -keysize 2048 -keypass $KeyPass -storepass $StorePass -validity $CertificateValidityInDays -keystore $JksFileName -ext SAN=DNS:$HostName,IP:$IpAddress -dname ""$DistinguishedName""" -NoNewWindow -Wait
-		Start-Process "keytool.exe" -ArgumentList "-importkeystore -srcalias solr-ssl -destalias solr-ssl -srckeystore $JksFileName -destkeystore $P12FileName -srcstoretype jks -deststoretype pkcs12 -srcstorepass $StorePass -deststorepass $StorePass -srckeypass $KeyPass -destkeypass $KeyPass -noprompt" -NoNewWindow -Wait
+		Start-Process "keytool.exe" -ArgumentList "-genkeypair -alias solr-ssl -keyalg RSA -keysize 2048 -keypass $keypassValue -storepass $storepassValue -validity $CertificateValidityInDays -keystore $JksFileName -ext SAN=DNS:$HostName,IP:$IpAddress -dname ""$DistinguishedName""" -NoNewWindow -Wait
+		Start-Process "keytool.exe" -ArgumentList "-importkeystore -srcalias solr-ssl -destalias solr-ssl -srckeystore $JksFileName -destkeystore $P12FileName -srcstoretype jks -deststoretype pkcs12 -srcstorepass $storepassValue -deststorepass $storepassValue -srckeypass $keypassValue -destkeypass $keypassValue -noprompt" -NoNewWindow -Wait
 		Copy-Item solr-ssl.keystore.jks $Path\server\etc
 	}
 
@@ -53,7 +59,6 @@ function Install-SolrSslCertificates {
 
 	Write-Progress -Activity $activity -Status "Importing SSL certificate to certificate store..."
 	if ($PSCmdlet.ShouldProcess($Path, "Import certificate")) {
-		$secureKeystoreSecret = ConvertTo-SecureString $KeyPass -AsPlainText -Force
 		Import-PfxCertificate -FilePath $P12FileName -CertStoreLocation "cert:\localmachine\root" -Password $secureKeystoreSecret
 	}
 
