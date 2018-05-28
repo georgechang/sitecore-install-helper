@@ -19,12 +19,12 @@ function Install-SolrSslCertificates {
 	$activity = "Setting up SSL for Solr..."
 
 	Write-Verbose "Adding JRE bin folder to path temporarily..."
-	$env:Path += ";$env:programfiles\Java\jre-9.0.1\bin"
+	$env:Path += ";$env:programfiles\Java\jre1.8.0_172\bin"
 
 	Write-Progress -Activity $activity -Status "Generating SSL keys..."
 	if ($PSCmdlet.ShouldProcess($Path, "Creating keys")) {
-		& keytool.exe -genkeypair -alias solr-ssl -keyalg RSA -keysize 2048 -keypass $KeyPass -storepass $StorePass -validity $CertificateValidityInDays -keystore $JksFileName -ext SAN=DNS:$HostName, IP:$IpAddress -dname "$DistinguishedName"
-		& keytool.exe -importkeystore -srcalias solr-ssl -destalias solr-ssl -srckeystore $JksFileName -destkeystore $P12FileName -srcstoretype jks -deststoretype pkcs12 -srcstorepass $StorePass -deststorepass $StorePass -srckeypass $KeyPass -destkeypass $KeyPass -noprompt
+		Start-Process "keytool.exe" -ArgumentList "-genkeypair -alias solr-ssl -keyalg RSA -keysize 2048 -keypass $KeyPass -storepass $StorePass -validity $CertificateValidityInDays -keystore $JksFileName -ext SAN=DNS:$HostName,IP:$IpAddress -dname ""$DistinguishedName""" -NoNewWindow -Wait
+		Start-Process "keytool.exe" -ArgumentList "-importkeystore -srcalias solr-ssl -destalias solr-ssl -srckeystore $JksFileName -destkeystore $P12FileName -srcstoretype jks -deststoretype pkcs12 -srcstorepass $StorePass -deststorepass $StorePass -srckeypass $KeyPass -destkeypass $KeyPass -noprompt" -NoNewWindow -Wait
 		Copy-Item solr-ssl.keystore.jks $Path\server\etc
 	}
 

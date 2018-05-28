@@ -14,10 +14,10 @@ function Install-ServerPrerequisites {
 
 	#for WMF
 	Write-Verbose "Checking server for Windows Features - IIS..."
-	$feature = Get-WindowsFeature Web-Server
-	if (!$feature.Installed) {
+	$feature = Get-WindowsOptionalFeature -Online -FeatureName "IIS-WebServerRole"
+	if ($feature.State -ne "Enabled") {
 		Write-Verbose "Windows Feature - IIS is not installed. Installing..."
-		Install-WindowsFeature Web-Server
+		Enable-WindowsOptionalFeature -Online -All -FeatureName "IIS-WebServerRole"
 		Write-Verbose "Windows Feature - IIS has been installed."
 	}
 	else {
@@ -25,10 +25,10 @@ function Install-ServerPrerequisites {
 	}
 
 	Write-Verbose "Checking server for Windows Features - IIS Management Console..."
-	$feature = Get-WindowsFeature Web-Mgmt-Console
-	if (!$feature.Installed) {
+	$feature = Get-WindowsOptionalFeature -Online -FeatureName "IIS-WebServerManagementTools"
+	if ($feature.State -ne "Enabled") {
 		Write-Verbose "Windows Feature - IIS Management Console is not installed. Installing..."
-		Install-WindowsFeature Web-Mgmt-Console
+		Enable-WindowsOptionalFeature -Online -All -FeatureName "IIS-WebServerManagementTools"
 		Write-Verbose "Windows Feature - IIS Management Console has been installed."
 	}
 	else {
@@ -36,10 +36,10 @@ function Install-ServerPrerequisites {
 	}
 
 	Write-Verbose "Checking server for Windows Features - ASP.NET 4.5..."
-	$feature = Get-WindowsFeature Web-Asp-Net45
-	if (!$feature.Installed) {
+	$feature = Get-WindowsOptionalFeature -Online -FeatureName "IIS-ASPNET45"
+	if ($feature.State -ne "Enabled") {
 		Write-Verbose "Windows Feature - ASP.NET 4.5 has not been installed. Installing..."
-		Install-WindowsFeature Web-Asp-Net45
+		Enable-WindowsOptionalFeature -Online -All -FeatureName "IIS-ASPNET45"
 		Write-Verbose "ASP.NET 4.5 has been installed."
 	}
 	else {
@@ -65,7 +65,7 @@ function Install-ServerPrerequisites {
 	#catch exception from Get-ChildItem
 	if ((-not (Test-Path "hklm:software\microsoft\iis extensions\msdeploy")) -and ($null -eq (Get-ChildItem "hklm:software\microsoft\iis extensions\msdeploy"))) {
 		Write-Verbose "Web Deploy 3.6 was not detected. Installing with Web PI..."
-		Start-Process "$env:programfiles\Microsoft\Web Platform Installer\WebpiCmd-x64.exe" -ArgumentList "/install /products:WDeploy36 /AcceptEULA" -Wait
+		Start-Process "$env:programfiles\Microsoft\Web Platform Installer\WebpiCmd-x64.exe" -ArgumentList "/install /products:WDeploy36 /AcceptEULA" -NoNewWindow -Wait
 		Write-Verbose "Web Deploy 3.6 has been successfully installed."
 	}
 	else {
@@ -77,7 +77,7 @@ function Install-ServerPrerequisites {
 	#catch exception from Get-ChildItem
 	if ((-not (Test-Path "hklm:software\microsoft\iis extensions\url rewrite")) -and ($null -eq (Get-ChildItem "hklm:software\microsoft\iis extensions\url rewrite"))) {
 		Write-Verbose "URL Rewrite was not detected. Installing with Web PI..."
-		Start-Process "$env:programfiles\Microsoft\Web Platform Installer\WebpiCmd-x64.exe" -ArgumentList "/install /products:UrlRewrite2 /AcceptEULA" -Wait
+		Start-Process "$env:programfiles\Microsoft\Web Platform Installer\WebpiCmd-x64.exe" -ArgumentList "/install /products:UrlRewrite2 /AcceptEULA" -NoNewWindow -Wait
 		Write-Verbose "URL Rewrite has been successfully installed."
 	}
 	else {
@@ -101,14 +101,14 @@ function Install-ServerPrerequisites {
 			Invoke-WebRequest -Uri $dac64 -OutFile DacFramework2016-x64.msi
 			Write-Verbose "Download of DACFx x64 successful."
 			Write-Verbose "Installing DACFx x64..."
-			Start-Process msiexec.exe -Wait -ArgumentList "/i DacFramework2016-x64.msi /quiet /qn /norestart"
+			Start-Process msiexec.exe -NoNewWindow -Wait -ArgumentList "/i DacFramework2016-x64.msi /quiet /qn /norestart"
 			Write-Verbose "Installation of DACFx x64 successful."
 
 			Write-Verbose "Downloading DACFx x86 from $dac86..."
 			Invoke-WebRequest -Uri $dac86 -OutFile DacFramework2016-x86.msi
 			Write-Verbose "Download of DACFx x86 successful."
 			Write-Verbose "Installing DACFx x86..."
-			Start-Process msiexec.exe -Wait -ArgumentList "/i DacFramework2016-x86.msi /quiet /qn /norestart"
+			Start-Process msiexec.exe -NoNewWindow -Wait -ArgumentList "/i DacFramework2016-x86.msi /quiet /qn /norestart"
 			Write-Verbose "Installation of DACFx x86 successful."
 
 			Write-Verbose "SQL Server 2016 Data-Tier Application Framework has been successfully installed."
@@ -130,7 +130,7 @@ function Install-ServerPrerequisites {
 			Invoke-WebRequest -Uri $clr2016 -OutFile SQLSysClrTypes2016-x64.msi
 			Write-Verbose "Download of CLR Types 2016 successful."
 			Write-Verbose "Installing CLR Types 2016..."
-			Start-Process msiexec.exe -ArgumentList "/i SQLSysClrTypes2016-x64.msi /quiet /qn /norestart" -Wait
+			Start-Process msiexec.exe -ArgumentList "/i SQLSysClrTypes2016-x64.msi /quiet /qn /norestart" -NoNewWindow -Wait
 			Write-Verbose "CLR Types for SQL Server 2016 has been successfully installed."
 		}
 		else {
@@ -145,7 +145,7 @@ function Install-ServerPrerequisites {
 			Invoke-WebRequest -Uri $smo -OutFile SharedManagementObjects-x64.msi
 			Write-Verbose "Download of SMO 2016 successful."
 			Write-Verbose "Installing SMO 2016..."
-			Start-Process msiexec.exe -Wait -ArgumentList "/i SharedManagementObjects-x64.msi /quiet /qn /norestart"
+			Start-Process msiexec.exe -NoNewWindow -Wait -ArgumentList "/i SharedManagementObjects-x64.msi /quiet /qn /norestart"
 			Write-Verbose "SQL Server 2016 Management Objects has been successfully installed."
 		}
 		else {
@@ -161,7 +161,7 @@ function Install-ServerPrerequisites {
 		Invoke-WebRequest -Uri  -OutFile NDP462-KB3151800-x86-x64-AllOS-ENU.exe
 		Write-Verbose "Download of ASP.NET 4.6.2 successful."
 		Write-Verbose "Installing ASP.NET 4.6.2..."
-		Start-Process NDP462-KB3151800-x86-x64-AllOS-ENU.exe -ArgumentList "/install /quiet" -Wait
+		Start-Process NDP462-KB3151800-x86-x64-AllOS-ENU.exe -ArgumentList "/install /quiet" -NoNewWindow -Wait
 		Write-Verbose "ASP.NET 4.6.2 has been successfully installed."
 	}
 	else {
