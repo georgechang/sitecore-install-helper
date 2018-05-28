@@ -1,131 +1,85 @@
 function Install-SitecoreEnvironment {
+	[CmdletBinding()]
 	param(
-		[switch]$SelfSignedCertificate,
-		[string]$XConnectClientCertificateName,
-		[string]$XConnectInstallationPath,
-		[string]$SitecoreInstallationPath,
-		[string]$LicenseXmlFilePath,
-		[string]$SolrServiceUrl,
-		[string]$SolrInstallPath,
-		[string]$SolrServiceName,
-		[string]$SqlServerHostName,
-		[string]$SqlAdminUserName,
-		[securestring]$SqlAdminPassword,
-		[string]$Prefix,
-		[string]$SqlServerDatabasePrefix,
-		[string]$SolrCorePrefix,
-		[string]$SitecoreHostName,
-		[string]$XConnectHostName
+		[Parameter(Mandatory = $true)]
+		[string]$Path
 	)
-	{
-		#define parameters 
-		$PSScriptRoot = "C:\Sitecore\Install\Sitecore 9.0.0 rev. 171002"
-		if (!$SitecoreHostName) {
-			$SitecoreHostName = "$Prefix.local"
-		}
-		if (!$XConnectHostName) {
-			$XConnectHostName = "$Prefix.xconnect"
-		}
-		if (!$SqlServerDatabasePrefix) {
-			$SqlServerDatabasePrefix = $Prefix
-		}
-		if (!$SolrCorePrefix) {
-			$SolrCorePrefix = $Prefix
-		}
- 
-		if ($SelfSignedCertificate) {
-			if (!$XConnectClientCertificateName) {
-				$XConnectClientCertificateName = "$Prefix.xconnect_client"
-			}
 
+	Import-Module WebAdministration
+
+	$parameters = Get-Content $Path -Raw | ConvertFrom-Json
+
+	foreach ($server in $parameters.servers) {
+		$xConnectHostName = "$($parameters.installation.prefix).xconnect"
+		$sitecoreHostName = "$($parameters.installation.prefix).local"
+
+		$xConnectClientCertificateName = "$($parameters.installation.prefix).xconnect_client"
+
+		if ($server.selfSignedCert) {
 			#install client certificate for xConnect 
 			$certParams = 
 			@{     
-				Path            = "$PSScriptRoot\xconnect-createcert.json"
-				CertificateName = $XConnectClientCertificateName
+				Path            = $parameters.assets.certificates.createCertJson
+				CertificateName = $xConnectClientCertificateName
 			} 
-			Install-SitecoreConfiguration @certParams -Verbose
+			Install-SitecoreConfiguration @certParams -Verbose:$VerbosePreference
 		}
 
 		#install Solr cores for xDB 
 		$solrParams = 
 		@{
-			Path        = "$PSScriptRoot\xconnect-solr.json"     
-			SolrUrl     = $SolrUrl    
-			SolrRoot    = $SolrRoot  
-			SolrService = $SolrService  
-			CorePrefix  = $SolrCorePrefix 
+			Path        = $parameters.assets.xConnect.solrJson  
+			SolrUrl     = $parameters.solr.url
+			SolrRoot    = $parameters.solr.root
+			SolrService = $parameters.solr.service
+			CorePrefix  = $parameters.installation.prefix
 		} 
-		Install-SitecoreConfiguration @solrParams -Verbose
+		Install-SitecoreConfiguration @solrParams -Verbose:$VerbosePreference
 
 		#deploy xConnect instance 
 		$xconnectParams = 
 		@{
-			Path             = "$PSScriptRoot\xconnect-xp0.json"
-			Package          = $XConnectInstallationPath
-			LicenseFile      = $LicenseXmlFilePath
-			SiteName         = $XConnectHostName
-			XConnectCert     = $XConnectClientCertificateName
-			SqlDbPrefix      = $SqlServerDatabasePrefix
-			SqlServer        = $SqlServerHostName
-			SqlAdminUser     = $SqlAdminUser
-			SqlAdminPassword = $SqlAdminPassword
-			SolrCorePrefix   = $SolrCorePrefix
-			SolrUrl          = $SolrServiceUrl
+			Path             = $parameters.assets.xConnect.installJson
+			Package          = $parameters.assets.xConnect.installPackage
+			LicenseFile      = $parameters.assets.xConnect.license
+			SiteName         = $xConnectHostName
+			XConnectCert     = $xConnectClientCertificateName
+			SqlDbPrefix      = $parameters.installation.prefix
+			SqlServer        = $parameters.sql.hostName
+			SqlAdminUser     = $parameters.sql.username
+			SqlAdminPassword = $parameters.sql.password
+			SolrCorePrefix   = $parameters.installation.prefix
+			SolrUrl          = $parameters.solr.url
 		} 
-		Install-SitecoreConfiguration @xconnectParams -Verbose
+		Install-SitecoreConfiguration @xconnectParams -Verbose:$VerbosePreference
 
 		#install Solr cores for Sitecore 
 		$solrParams = 
 		@{
-			Path        = "$PSScriptRoot\sitecore-solr.json"
-			SolrUrl     = $SolrServiceUrl
-			SolrRoot    = $SolrInstallPath
-			SolrService = $SolrServiceName
-			CorePrefix  = $SolrCorePrefix 
+			Path        = $parameters.assets.sitecore.solrJson
+			SolrUrl     = $parameters.solr.url
+			SolrRoot    = $parameters.solr.root
+			SolrService = $parameters.solr.service
+			CorePrefix  = $parameters.installation.prefix
 		} 
-		Install-SitecoreConfiguration @solrParams -Verbose
+		Install-SitecoreConfiguration @solrParams -Verbose:$VerbosePreference
  
 		#install Sitecore instance 
 		$sitecoreParams = 
 		@{     
-			Path                      = "$PSScriptRoot\sitecore-XP0.json"
-			Package                   = $SitecoreInstallationPath
-			LicenseFile               = $LicenseXmlFilePath
-			SqlDbPrefix               = $SqlServerDatabasePrefix
-			SqlServer                 = $SqlServerHostName
-			SqlAdminUser              = $SqlAdminUserName
-			SqlAdminPassword          = $SqlAdminPassword
-			SolrCorePrefix            = $SolrCorePrefix
-			SolrUrl                   = $SolrServiceUrl
-			XConnectCert              = $XConnectClientCertificateName
-			SiteName                  = $SitecoreHostName
-			XConnectCollectionService = "https://$XConnectHostName"
+			Path                      = $parameters.assets.sitecore.installJson
+			Package                   = $parameters.assets.sitecore.installPackage
+			LicenseFile               = $parameters.assets.sitecore.license
+			SqlDbPrefix               = $parameters.installation.prefix
+			SqlServer                 = $parameters.sql.hostName
+			SqlAdminUser              = $parameters.sql.username
+			SqlAdminPassword          = $parameters.sql.password
+			SolrCorePrefix            = $parameters.installation.prefix
+			SolrUrl                   = $parameters.solr.url
+			XConnectCert              = $xConnectClientCertificateName
+			SiteName                  = $sitecoreHostName
+			XConnectCollectionService = "https://$xConnectHostName"
 		} 
-		Install-SitecoreConfiguration @sitecoreParams -Verbose
-
-		$sitecoreParams = 
-		@{     
-			Path                                 = "$PSScriptRoot\sitecore-XP1-cd.json"
-			Package                              = "$PSScriptRoot\Sitecore 9.0.0 rev. 171002 (OnPrem)_cd.scwdp.zip"
-			LicenseFile                          = "$PSScriptRoot\license.xml"
-			SqlDbPrefix                          = "sask"
-			SolrCorePrefix                       = "sask"
-			XConnectCert                         = "www-dc9-cd-q1"
-			SiteName                             = "sask"
-			SqlCoreUser                          = "coreuser"
-			SqlCorePassword                      = "Test12345"
-			SqlWebUser                           = "webuser"
-			SqlWebPassword                       = "Test12345"
-			SqlFormsUser                         = "formsuser"
-			SqlFormsPassword                     = "Test12345"
-			SqlServer                            = "saskpower-qadev-sqlelastic.database.windows.net"
-			SolrUrl                              = "https://www-dc9-cm-q1:8983/solr"
-			XConnectCollectionService            = "https://www-dc9-cm-q1:4433"
-			XConnectReferenceDataService         = "https://www-dc9-cm-q1:4433"
-			MarketingAutomationOperationsService = "https://www-dc9-cm-q1:4433"
-			MarketingAutomationReportingService  = "https://www-dc9-cm-q1:4433"
-		} 
-		Install-SitecoreConfiguration @sitecoreParams -Verbose
+		Install-SitecoreConfiguration @sitecoreParams -Verbose:$VerbosePreference
 	}
 }

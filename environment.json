@@ -4,35 +4,38 @@
 			"name": "local",
 			"hostName": "localhost",
 			"checkPrerequisites": true,
-			"installSolr": true
+			"installSolr": true,
+			"selfSignedCert": true
 		}
 	],
 	"sql": {
+		"hostName": "localhost",
 		"username": "sitecore",
-		"password": "pass@word1",
-		"prefix": "sc901"
+		"password": "pass@word1"
 	},
 	"solr": {
 		"url": "https://localhost:8983/solr",
 		"root": "c:\\solr-6.6.2",
-		"service": "solr662",
-		"prefix": "sc901"
+		"service": "solr662"
 	},
 	"assets": {
+		"certificates": {
+			"createCertJson": "C:\\Sitecore\\9.0.1\\Sitecore 9.0.1 rev. 171219 (WDP XP0 packages)\\xconnect-createcert.json"
+		},
 		"xConnect": {
-			"solrJson": "",
-			"installJson": "",
-			"installPackage": ""
+			"solrJson": "C:\\Sitecore\\9.0.1\\Sitecore 9.0.1 rev. 171219 (WDP XP0 packages)\\xconnect-solr.json",
+			"installJson": "C:\\Sitecore\\9.0.1\\Sitecore 9.0.1 rev. 171219 (WDP XP0 packages)\\xconnect-xp0.json",
+			"installPackage": "C:\\Sitecore\\9.0.1\\Sitecore 9.0.1 rev. 171219 (WDP XP0 packages)\\Sitecore 9.0.1 rev. 171219 (OnPrem)_xp0xconnect.scwdp.zip",
+			"license": "C:\\Users\\George\\OneDrive\\Documents\\Work\\Perficient\\license.xml"
 		},
 		"sitecore": {
-			"solrJson": "",
-			"installJson": "",
-			"installPackage": "",
-			"license": ""
+			"solrJson": "C:\\Sitecore\\9.0.1\\Sitecore 9.0.1 rev. 171219 (WDP XP0 packages)\\sitecore-solr.json",
+			"installJson": "C:\\Sitecore\\9.0.1\\Sitecore 9.0.1 rev. 171219 (WDP XP0 packages)\\sitecore-xp0.json",
+			"installPackage": "C:\\Sitecore\\9.0.1\\Sitecore 9.0.1 rev. 171219 (WDP XP0 packages)\\Sitecore 9.0.1 rev. 171219 (OnPrem)_single.scwdp.zip",
+			"license": "C:\\Users\\George\\OneDrive\\Documents\\Work\\Perficient\\license.xml"
 		}
 	},
 	"installation": {
-		"hostName": "sc901.local",
-		"siteName": "sc901"
+		"prefix": "sc901"
 	}
 }

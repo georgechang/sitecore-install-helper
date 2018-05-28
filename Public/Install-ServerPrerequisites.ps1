@@ -14,10 +14,10 @@ function Install-ServerPrerequisites {
 
 	#for WMF
 	Write-Verbose "Checking server for Windows Features - IIS..."
-	$feature = Get-WindowsOptionalFeature -Online -FeatureName "IIS-WebServerRole"
+	$feature = Get-WindowsOptionalFeature -Online -FeatureName "IIS-WebServerRole" -Verbose:$VerbosePreference
 	if ($feature.State -ne "Enabled") {
 		Write-Verbose "Windows Feature - IIS is not installed. Installing..."
-		Enable-WindowsOptionalFeature -Online -All -FeatureName "IIS-WebServerRole"
+		Enable-WindowsOptionalFeature -Online -All -FeatureName "IIS-WebServerRole" -Verbose:$VerbosePreference
 		Write-Verbose "Windows Feature - IIS has been installed."
 	}
 	else {
@@ -25,10 +25,10 @@ function Install-ServerPrerequisites {
 	}
 
 	Write-Verbose "Checking server for Windows Features - IIS Management Console..."
-	$feature = Get-WindowsOptionalFeature -Online -FeatureName "IIS-WebServerManagementTools"
+	$feature = Get-WindowsOptionalFeature -Online -FeatureName "IIS-WebServerManagementTools" -Verbose:$VerbosePreference
 	if ($feature.State -ne "Enabled") {
 		Write-Verbose "Windows Feature - IIS Management Console is not installed. Installing..."
-		Enable-WindowsOptionalFeature -Online -All -FeatureName "IIS-WebServerManagementTools"
+		Enable-WindowsOptionalFeature -Online -All -FeatureName "IIS-WebServerManagementTools" -Verbose:$VerbosePreference
 		Write-Verbose "Windows Feature - IIS Management Console has been installed."
 	}
 	else {
@@ -36,10 +36,10 @@ function Install-ServerPrerequisites {
 	}
 
 	Write-Verbose "Checking server for Windows Features - ASP.NET 4.5..."
-	$feature = Get-WindowsOptionalFeature -Online -FeatureName "IIS-ASPNET45"
+	$feature = Get-WindowsOptionalFeature -Online -FeatureName "IIS-ASPNET45" -Verbose:$VerbosePreference
 	if ($feature.State -ne "Enabled") {
 		Write-Verbose "Windows Feature - ASP.NET 4.5 has not been installed. Installing..."
-		Enable-WindowsOptionalFeature -Online -All -FeatureName "IIS-ASPNET45"
+		Enable-WindowsOptionalFeature -Online -All -FeatureName "IIS-ASPNET45" -Verbose:$VerbosePreference
 		Write-Verbose "ASP.NET 4.5 has been installed."
 	}
 	else {
@@ -51,7 +51,7 @@ function Install-ServerPrerequisites {
 	if (-not (Test-Path "C:\Program Files\Microsoft\Web Platform Installer\WebpiCmd-x64.exe")) {
 		Write-Verbose "Web Platform Installer was not detected. Installing..."
 		Write-Verbose "Downloading Web Platform Installer from $webpi..."
-		Invoke-WebRequest -Uri $webpi -OutFile WebPlatformInstaller_amd64_en-US.msi
+		Invoke-WebRequest -Uri $webpi -OutFile WebPlatformInstaller_amd64_en-US.msi -Verbose:$VerbosePreference
 		Write-Verbose "Installing Web Platform Installer..."
 		Start-Process msiexec.exe -Wait -ArgumentList "/i WebPlatformInstaller_amd64_en-US.msi /quiet /qn /norestart"
 		Write-Verbose "Web Platform Installer installed successfully."
@@ -98,14 +98,14 @@ function Install-ServerPrerequisites {
 
 			#2016
 			Write-Verbose "Downloading DACFx x64 from $dac64..."
-			Invoke-WebRequest -Uri $dac64 -OutFile DacFramework2016-x64.msi
+			Invoke-WebRequest -Uri $dac64 -OutFile DacFramework2016-x64.msi -Verbose:$VerbosePreference
 			Write-Verbose "Download of DACFx x64 successful."
 			Write-Verbose "Installing DACFx x64..."
 			Start-Process msiexec.exe -NoNewWindow -Wait -ArgumentList "/i DacFramework2016-x64.msi /quiet /qn /norestart"
 			Write-Verbose "Installation of DACFx x64 successful."
 
 			Write-Verbose "Downloading DACFx x86 from $dac86..."
-			Invoke-WebRequest -Uri $dac86 -OutFile DacFramework2016-x86.msi
+			Invoke-WebRequest -Uri $dac86 -OutFile DacFramework2016-x86.msi -Verbose:$VerbosePreference
 			Write-Verbose "Download of DACFx x86 successful."
 			Write-Verbose "Installing DACFx x86..."
 			Start-Process msiexec.exe -NoNewWindow -Wait -ArgumentList "/i DacFramework2016-x86.msi /quiet /qn /norestart"
@@ -127,7 +127,7 @@ function Install-ServerPrerequisites {
 
 			#2016
 			Write-Verbose "Downloading CLR Types 2016 from $clr2016..."
-			Invoke-WebRequest -Uri $clr2016 -OutFile SQLSysClrTypes2016-x64.msi
+			Invoke-WebRequest -Uri $clr2016 -OutFile SQLSysClrTypes2016-x64.msi -Verbose:$VerbosePreference
 			Write-Verbose "Download of CLR Types 2016 successful."
 			Write-Verbose "Installing CLR Types 2016..."
 			Start-Process msiexec.exe -ArgumentList "/i SQLSysClrTypes2016-x64.msi /quiet /qn /norestart" -NoNewWindow -Wait
@@ -142,7 +142,7 @@ function Install-ServerPrerequisites {
 		if (-not (Test-Path "${env:programfiles(x86)}\Microsoft SQL Server\130\SDK\Assemblies\Microsoft.SqlServer.Smo.dll")) {
 			Write-Verbose "SQL Server 2016 Management Objects was not detected. Installing..."
 			Write-Verbose "Downloading SMO 2016 from $smo..."
-			Invoke-WebRequest -Uri $smo -OutFile SharedManagementObjects-x64.msi
+			Invoke-WebRequest -Uri $smo -OutFile SharedManagementObjects-x64.msi -Verbose:$VerbosePreference
 			Write-Verbose "Download of SMO 2016 successful."
 			Write-Verbose "Installing SMO 2016..."
 			Start-Process msiexec.exe -NoNewWindow -Wait -ArgumentList "/i SharedManagementObjects-x64.msi /quiet /qn /norestart"
@@ -158,7 +158,7 @@ function Install-ServerPrerequisites {
 	if (Get-ChildItem "HKLM:SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full\" | Get-ItemPropertyValue -Name Release | ForEach-Object { $_ -lt 394802 }) {
 		Write-Verbose "ASP.NET 4.6.2 was not detected. Installing..."
 		Write-Verbose "Downloading ASP.NET 4.6.2 from $aspnet462..."
-		Invoke-WebRequest -Uri  -OutFile NDP462-KB3151800-x86-x64-AllOS-ENU.exe
+		Invoke-WebRequest -Uri  -OutFile NDP462-KB3151800-x86-x64-AllOS-ENU.exe -Verbose:$VerbosePreference
 		Write-Verbose "Download of ASP.NET 4.6.2 successful."
 		Write-Verbose "Installing ASP.NET 4.6.2..."
 		Start-Process NDP462-KB3151800-x86-x64-AllOS-ENU.exe -ArgumentList "/install /quiet" -NoNewWindow -Wait
