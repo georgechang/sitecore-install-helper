@@ -31,7 +31,7 @@ function Install-SolrSslCertificate {
 	if ($PSCmdlet.ShouldProcess($Path, "Creating keys")) {
 		Start-Process "keytool.exe" -ArgumentList "-genkeypair -alias solr-ssl -keyalg RSA -keysize 2048 -keypass $keypassValue -storepass $storepassValue -validity $CertificateValidityInDays -keystore $JksFileName -ext SAN=DNS:$HostName,IP:$IpAddress -dname ""$DistinguishedName""" -NoNewWindow -Wait
 		Start-Process "keytool.exe" -ArgumentList "-importkeystore -srcalias solr-ssl -destalias solr-ssl -srckeystore $JksFileName -destkeystore $P12FileName -srcstoretype jks -deststoretype pkcs12 -srcstorepass $storepassValue -deststorepass $storepassValue -srckeypass $keypassValue -destkeypass $keypassValue -noprompt" -NoNewWindow -Wait
-		Copy-Item solr-ssl.keystore.jks $Path\server\etc
+		Copy-Item solr-ssl.keystore.jks $ \server\etc
 	}
 
 	Write-Progress -Activity $activity -Status "Updating Solr configuration for SSL..."
@@ -46,7 +46,7 @@ function Install-SolrSslCertificate {
 					$content = $content.Substring(0, $content.IndexOf('=')) + "=$Path\server\etc\solr-ssl.keystore.jks"
 				}
 				elseif ($content -match " SOLR_SSL_(KEY|TRUST)_STORE_PASSWORD=") {
-					$content = $content.Substring(0, $content.IndexOf('=')) + "=$StorePass"
+					$content = $content.Substring(0, $content.IndexOf('=')) + "=$storepassValue"
 				}
 				Write-Verbose "New content: $content"
 			}
@@ -59,7 +59,7 @@ function Install-SolrSslCertificate {
 
 	Write-Progress -Activity $activity -Status "Importing SSL certificate to certificate store..."
 	if ($PSCmdlet.ShouldProcess($Path, "Import certificate")) {
-		Import-PfxCertificate -FilePath $P12FileName -CertStoreLocation "cert:\localmachine\root" -Password $secureKeystoreSecret
+		Import-PfxCertificate -FilePath $P12FileName -CertStoreLocation "cert:\localmachine\root" -Password $StorePass
 	}
 
 	Write-Progress -Activity $activity -Status "Restarting Solr Service..."
