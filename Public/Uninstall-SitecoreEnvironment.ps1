@@ -5,10 +5,17 @@ function Uninstall-SitecoreEnvironment {
 		[string]$Prefix
 	)
 
-	Remove-XConnectServices -Prefix $Prefix
+	$marketingAutomationServiceName = "$Prefix.xconnect-MarketingAutomationService"
+	$indexWorkerName = "$Prefix.xconnect-IndexWorker"
+	$processingEngineServiceName = "$Prefix.xconnect-ProcessingEngineService"
 
-	Remove-IISWebsiteAppPool -Name $Prefix.local
-	Remove-IISWebsiteAppPool -Name $Prefix.xconnect
+	Remove-WindowsService -Name $marketingAutomationServiceName
+	Remove-WindowsService -Name $indexWorkerName
+	Remove-WindowsService -Name $processingEngineServiceName
+
+	Remove-IISWebsiteAppPool -Name "$Prefix.sitecore"
+	Remove-IISWebsiteAppPool -Name "$Prefix.xconnect"
+	Remove-IISWebsiteAppPool -Name "$Prefix.identityserver"
 
 	Remove-SqlServerDatabases -Prefix $Prefix
 }

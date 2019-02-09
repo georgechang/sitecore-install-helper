@@ -7,9 +7,16 @@ function Remove-SqlServerDatabases {
 		[securestring]$Password
 	)
 	
-	Import-Module SqlServer
+	if (-not (Get-Module SqlServer -ListAvailable)) {
+		Import-Module SqlServer
+	}
 
 	#$credential = New-SqlCredential -Name "sqlcredential" -Identity $Username -Secret $Password
 	
-	Get-SqlInstance -Path "SQLSERVER:\SQL\$env:computername\DEFAULT" | Get-SqlDatabase | ? { $_.Name.StartsWith("$Prefix_") } | % { $_.Drop() }
+	$databases = Get-SqlInstance -Path "SQLSERVER:\SQL\$env:computername\DEFAULT" | Get-SqlDatabase | ? { $_.Name.StartsWith($Prefix + "_") }
+
+	for ($i = 0; $i -lt $databases.Count; $i++) {
+		Write-Verbose ("Dropping database " + $databases[$i].Name + "...")
+		$databases[$i].Drop()
+	}
 }
