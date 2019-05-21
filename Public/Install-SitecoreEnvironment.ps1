@@ -10,6 +10,10 @@ function Install-SitecoreEnvironment {
 	$parameters = Get-Content $Path -Raw | ConvertFrom-Json
 
 	foreach ($server in $parameters.servers) {
+		if ($server.Roles.Contains("Solr")) {
+			
+		}
+
 		$xConnectHostName = "$($parameters.installation.prefix).xconnect"
 		$sitecoreHostName = "$($parameters.installation.prefix).local"
 

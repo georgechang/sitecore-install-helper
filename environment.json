@@ -4,7 +4,10 @@
 			"name": "local",
 			"hostName": "localhost",
 			"checkPrerequisites": true,
-			"installSolr": true,
+			"roles": [
+				"Standalone",
+				"Solr"
+			],
 			"selfSignedCert": true
 		}
 	],
@@ -14,9 +17,9 @@
 		"password": "pass@word1"
 	},
 	"solr": {
-		"url": "https://localhost:8983/solr",
-		"root": "c:\\solr-6.6.2",
-		"service": "solr662"
+		"url": "https://localhost:8771/solr",
+		"root": "c:\\solr-7.7.1",
+		"service": "solr771"
 	},
 	"assets": {
 		"certificates": {

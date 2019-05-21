@@ -3,7 +3,7 @@ function Install-SolrServer {
 	param(
 		[Parameter(Mandatory, ValueFromPipeline)]
 		[string]$Path,
-		[string]$Uri = "http://mirrors.gigenet.com/apache/lucene/solr/6.6.2/solr-6.6.2.zip"
+		[string]$Uri = "http://archive.apache.org/dist/lucene/solr/7.7.1/solr-7.7.1.zip"
 	)
 
 	$activity = "Installing Solr Server..."

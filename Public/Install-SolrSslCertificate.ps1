@@ -24,14 +24,14 @@ function Install-SolrSslCertificate {
 
 	$activity = "Setting up SSL for Solr..."
 
-	Write-Verbose "Adding JRE bin folder to path temporarily..."
-	$env:Path += ";$env:programfiles\Java\jre1.8.0_172\bin"
+	Write-Verbose "Adding Java bin folder to path temporarily..."
+	$env:Path += ";$env:JAVA_HOME\bin"
 
 	Write-Progress -Activity $activity -Status "Generating SSL keys..."
 	if ($PSCmdlet.ShouldProcess($Path, "Creating keys")) {
 		Start-Process "keytool.exe" -ArgumentList "-genkeypair -alias solr-ssl -keyalg RSA -keysize 2048 -keypass $keypassValue -storepass $storepassValue -validity $CertificateValidityInDays -keystore $JksFileName -ext SAN=DNS:$HostName,IP:$IpAddress -dname ""$DistinguishedName""" -NoNewWindow -Wait
 		Start-Process "keytool.exe" -ArgumentList "-importkeystore -srcalias solr-ssl -destalias solr-ssl -srckeystore $JksFileName -destkeystore $P12FileName -srcstoretype jks -deststoretype pkcs12 -srcstorepass $storepassValue -deststorepass $storepassValue -srckeypass $keypassValue -destkeypass $keypassValue -noprompt" -NoNewWindow -Wait
-		Copy-Item solr-ssl.keystore.jks $ \server\etc
+		Copy-Item solr-ssl.keystore.jks $Path\server\etc
 	}
 
 	Write-Progress -Activity $activity -Status "Updating Solr configuration for SSL..."
